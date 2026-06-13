@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>城市大富翁</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section id="setup-screen" class="screen setup-screen">
+        <div class="setup-panel">
+          <div>
+            <p class="eyebrow">本地同屏 / 真人 + AI</p>
+            <h1>城市大富翁</h1>
+            <p class="intro">选择 2-4 名玩家，在中国城市主题棋盘上买地、建房、收租，直到最后一位玩家胜出。</p>
+          </div>
+
+          <div class="setup-card">
+            <label class="field-label" for="player-count">玩家数量</label>
+            <select id="player-count">
+              <option value="2">2 人</option>
+              <option value="3">3 人</option>
+              <option value="4" selected>4 人</option>
+            </select>
+            <div id="player-configs" class="player-configs"></div>
+            <p id="setup-error" class="setup-error" role="alert"></p>
+            <button id="start-game" class="primary-btn">开始游戏</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="game-screen" class="screen game-screen hidden">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">原创中国城市主题</p>
+            <h2>城市大富翁</h2>
+          </div>
+          <div class="round-status">
+            <span id="dice-display">🎲 -</span>
+            <button id="restart-game" class="ghost-btn">重新开始</button>
+          </div>
+        </header>
+
+        <section class="game-layout">
+          <div class="board-wrap">
+            <div id="board" class="board" aria-label="游戏棋盘"></div>
+          </div>
+
+          <aside class="side-panel">
+            <section class="turn-panel">
+              <p class="eyebrow">当前回合</p>
+              <h3 id="turn-title">等待开始</h3>
+              <p id="turn-message">请开始一局新游戏。</p>
+              <div id="action-buttons" class="action-buttons"></div>
+            </section>
+
+            <section class="players-panel">
+              <div class="panel-head">
+                <h3>玩家资产</h3>
+                <button id="manage-assets" class="ghost-btn">资产管理</button>
+              </div>
+              <div id="players-list" class="players-list"></div>
+            </section>
+
+            <section class="log-panel">
+              <h3>游戏日志</h3>
+              <ol id="game-log" class="game-log"></ol>
+            </section>
+          </aside>
+        </section>
+      </section>
+
+      <section id="end-screen" class="screen end-screen hidden">
+        <div class="end-panel">
+          <p class="eyebrow">游戏结束</p>
+          <h2 id="winner-title">胜者</h2>
+          <div id="final-ranking" class="final-ranking"></div>
+          <button id="play-again" class="primary-btn">再来一局</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="tile-dialog" class="dialog">
+      <div class="dialog-head">
+        <h3 id="dialog-title">地块详情</h3>
+        <button id="close-dialog" class="icon-btn" aria-label="关闭">×</button>
+      </div>
+      <div id="dialog-body" class="dialog-body"></div>
+    </dialog>
+
+    <script src="game.js"></script>
+  </body>
+</html>
