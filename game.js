@@ -840,7 +840,7 @@ function renderTileMeta(tile) {
     const status = tile.mortgaged ? `<span class="status-label">抵押</span>` : houses;
     return `<span class="owner-label" style="--owner-color:${owner.color}">${owner.name}</span>${status}`;
   }
-  if (tile.price) return `<span class="sale-label">待售 ¥${tile.price}</span>`;
+  if (tile.price) return `<span class="sale-label"><span>待售</span><strong>¥${tile.price}</strong></span>`;
   return "";
 }
 

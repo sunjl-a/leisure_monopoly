@@ -303,7 +303,7 @@ input {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: 9px 1fr minmax(24px, auto);
+  grid-template-rows: 9px minmax(0, 1fr) 30px;
   overflow: hidden;
   border: 2px solid rgba(91, 63, 43, 0.65);
   border-radius: 6px;
@@ -374,13 +374,14 @@ input {
 }
 
 .tile-meta {
-  min-height: 24px;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: 2px;
-  padding: 1px 3px 3px;
+  padding: 1px 3px 2px;
   font-size: 11px;
   font-weight: 900;
   line-height: 1.1;
@@ -407,12 +408,22 @@ input {
 }
 
 .sale-label {
+  min-width: 0;
+  width: 100%;
   border: 1px solid rgba(91, 63, 43, 0.32);
   background: #fff4d8;
   color: #6c4a22;
+  flex-direction: column;
+  gap: 0;
   line-height: 1;
-  white-space: normal;
-  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.sale-label strong {
+  display: block;
+  color: #7d551f;
+  font-size: 10px;
+  line-height: 1;
 }
 
 .owner-label {
@@ -753,6 +764,7 @@ input {
   }
 
   .tile {
+    grid-template-rows: 5px minmax(0, 1fr) 24px;
     border-width: 1px;
     border-radius: 4px;
   }
@@ -766,7 +778,7 @@ input {
   }
 
   .tile-meta {
-    min-height: 16px;
+    padding: 0 2px 1px;
     font-size: 8px;
   }
 
@@ -799,7 +811,11 @@ input {
   .sale-label,
   .owner-label,
   .status-label {
-    padding: 1px 3px;
+    padding: 1px 2px;
+  }
+
+  .sale-label strong {
+    font-size: 8px;
   }
 
   .center-content strong {
