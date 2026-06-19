@@ -380,10 +380,10 @@ input {
   justify-content: center;
   flex-wrap: wrap;
   gap: 2px;
-  padding: 2px 3px 4px;
+  padding: 1px 3px 3px;
   font-size: 11px;
   font-weight: 900;
-  line-height: 1.05;
+  line-height: 1.1;
 }
 
 .start-label,
@@ -410,6 +410,9 @@ input {
   border: 1px solid rgba(91, 63, 43, 0.32);
   background: #fff4d8;
   color: #6c4a22;
+  line-height: 1;
+  white-space: normal;
+  word-break: keep-all;
 }
 
 .owner-label {
