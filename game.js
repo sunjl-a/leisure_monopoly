@@ -45,6 +45,71 @@ const elements = {
 };
 
 let state = null;
+let audioContext = null;
+
+const SOUND_PATTERNS = {
+  start: [
+    { type: "triangle", frequency: 392, start: 0, duration: 0.1, gain: 0.09 },
+    { type: "triangle", frequency: 523, start: 0.11, duration: 0.12, gain: 0.08 },
+    { type: "triangle", frequency: 659, start: 0.24, duration: 0.16, gain: 0.07 },
+  ],
+  dice: [
+    { type: "square", frequency: 260, start: 0, duration: 0.045, gain: 0.06 },
+    { type: "square", frequency: 390, start: 0.055, duration: 0.045, gain: 0.055 },
+    { type: "square", frequency: 310, start: 0.11, duration: 0.05, gain: 0.05 },
+  ],
+  money: [
+    { type: "sine", frequency: 740, start: 0, duration: 0.07, gain: 0.06 },
+    { type: "sine", frequency: 988, start: 0.08, duration: 0.1, gain: 0.05 },
+  ],
+  card: [
+    { type: "triangle", frequency: 620, start: 0, duration: 0.08, gain: 0.055 },
+    { type: "triangle", frequency: 460, start: 0.08, duration: 0.11, gain: 0.045 },
+  ],
+  auction: [
+    { type: "square", frequency: 520, start: 0, duration: 0.06, gain: 0.055 },
+    { type: "square", frequency: 520, start: 0.1, duration: 0.06, gain: 0.05 },
+  ],
+  jail: [
+    { type: "sawtooth", frequency: 220, start: 0, duration: 0.12, gain: 0.055 },
+    { type: "sawtooth", frequency: 165, start: 0.13, duration: 0.18, gain: 0.045 },
+  ],
+  win: [
+    { type: "triangle", frequency: 523, start: 0, duration: 0.12, gain: 0.08 },
+    { type: "triangle", frequency: 659, start: 0.13, duration: 0.12, gain: 0.075 },
+    { type: "triangle", frequency: 784, start: 0.26, duration: 0.2, gain: 0.07 },
+  ],
+};
+
+function getAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!audioContext) audioContext = new AudioContextClass();
+  if (audioContext.state === "suspended") audioContext.resume();
+  return audioContext;
+}
+
+function playSound(name) {
+  const context = getAudioContext();
+  const pattern = SOUND_PATTERNS[name];
+  if (!context || !pattern) return;
+  const now = context.currentTime;
+  pattern.forEach((note) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = now + note.start;
+    const end = start + note.duration;
+    oscillator.type = note.type;
+    oscillator.frequency.setValueAtTime(note.frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(note.gain, start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, end);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(end + 0.02);
+  });
+}
 
 function createBoard() {
   return [
@@ -144,8 +209,8 @@ function renderPlayerConfigs() {
       <div class="avatar-dot" style="background:${PLAYER_COLORS[i]}">${PLAYER_ICONS[i]}</div>
       <input id="player-name-${i}" value="玩家${i + 1}" maxlength="8" aria-label="玩家${i + 1}名称" />
       <select id="player-type-${i}" aria-label="玩家${i + 1}类型">
-        <option value="human"${i === 0 ? " selected" : ""}>真人</option>
-        <option value="ai"${i !== 0 ? " selected" : ""}>AI</option>
+        <option value="human"${i === 0 ? " selected" : ""}>真人玩家</option>
+        <option value="ai"${i !== 0 ? " selected" : ""}>电脑玩家</option>
       </select>
     `;
     elements.playerConfigs.appendChild(row);
@@ -192,6 +257,7 @@ function startGame() {
   };
   showScreen("game");
   addLog("游戏开始。每位玩家获得 ¥1500。");
+  playSound("start");
   render();
   beginTurn();
 }
@@ -265,6 +331,7 @@ function rollDice() {
   state.dice = [d1, d2];
   player.lastRoll = d1 + d2;
   addLog(`${player.name} 掷出 ${d1} + ${d2} = ${player.lastRoll}。`);
+  playSound("dice");
   moveSteps(player, player.lastRoll);
 }
 
@@ -274,6 +341,7 @@ function moveSteps(player, steps) {
   if (oldPosition + steps >= state.board.length) {
     changeCash(player, PASS_GO_CASH, false);
     addLog(`${player.name} 经过起点，获得 ¥${PASS_GO_CASH}。`);
+    playSound("money");
   }
   player.position = newPosition;
   resolveTile(player, state.board[player.position]);
@@ -283,6 +351,7 @@ function moveTo(player, index, alwaysPayGo = false) {
   if (alwaysPayGo || index < player.position) {
     changeCash(player, PASS_GO_CASH, false);
     addLog(`${player.name} 经过起点，获得 ¥${PASS_GO_CASH}。`);
+    playSound("money");
   }
   player.position = index;
   resolveTile(player, state.board[player.position]);
@@ -349,6 +418,7 @@ function buyTile(player, tile) {
   tile.owner = player.id;
   player.properties.push(state.board.indexOf(tile));
   addLog(`${player.name} 购买 ${tile.name}，支付 ¥${tile.price}。`);
+  playSound("money");
   render();
 }
 
@@ -363,6 +433,7 @@ function startAuction(tile) {
   state.phase = "auction";
   state.auction = { tileIndex: state.board.indexOf(tile), bidders, highestBid: 0, winner: null, cursor: 0, roundPasses: 0 };
   addLog(`${tile.name} 开始拍卖。`);
+  playSound("auction");
   render();
   continueAuction();
 }
@@ -444,6 +515,7 @@ function finishAuction() {
     tile.owner = winner.id;
     winner.properties.push(auction.tileIndex);
     addLog(`${winner.name} 以 ¥${auction.highestBid} 拍得 ${tile.name}。`);
+    playSound("money");
   } else {
     addLog(`${tile.name} 流拍。`);
   }
@@ -480,6 +552,7 @@ function drawCard(player, deckName) {
   state.deckIndex[deckName] += 1;
   const card = deck[index];
   addLog(`${player.name} 抽到：${card.text}`);
+  playSound("card");
   card.effect(player);
 }
 
@@ -487,6 +560,7 @@ function chargePlayer(player, amount, receiver = null, reason = "费用") {
   if (amount <= 0) return;
   player.cash -= amount;
   addLog(`${player.name} 支付 ${reason} ¥${amount}${receiver ? ` 给 ${receiver.name}` : ""}。`);
+  playSound("money");
   if (player.cash < 0) {
     state.pendingDebt = { playerId: player.id, receiverId: receiver ? receiver.id : null, amount: Math.abs(player.cash), reason };
     if (handleDebt(player) && receiver) receiver.cash += amount;
@@ -498,6 +572,7 @@ function chargePlayer(player, amount, receiver = null, reason = "费用") {
 function changeCash(player, amount, log = true) {
   player.cash += amount;
   if (log) addLog(`${player.name} ${amount >= 0 ? "获得" : "支付"} ¥${Math.abs(amount)}。`);
+  if (log) playSound("money");
 }
 
 function handleDebt(player) {
@@ -552,6 +627,7 @@ function sendToJail(player) {
   player.jailTurns = 2;
   state.phase = "action";
   addLog(`${player.name} 被送入监狱。`);
+  playSound("jail");
 }
 
 function leaveJail(player) {
@@ -566,6 +642,7 @@ function leaveJail(player) {
     player.cash -= BAIL_COST;
     player.jailTurns = 0;
     addLog(`${player.name} 支付 ¥${BAIL_COST} 保释离开监狱。`);
+    playSound("money");
     render();
     return true;
   }
@@ -771,9 +848,9 @@ function renderTokens(index) {
   return state.players
     .filter((player) => !player.bankrupt && player.position === index)
     .map((player) => `
-      <span class="token ${player.type === "ai" ? "token-ai" : "token-human"}" style="--token-color:${player.color}" title="${player.name}（${player.type === "ai" ? "AI" : "真人"}）">
+      <span class="token ${player.type === "ai" ? "token-ai" : "token-human"}" style="--token-color:${player.color}" title="${player.name}（${player.type === "ai" ? "电脑玩家" : "真人玩家"}）">
         <span class="token-icon">${player.icon}</span>
-        <span class="token-type">${player.type === "ai" ? "AI" : "人"}</span>
+        <span class="token-type">${player.type === "ai" ? "电脑" : "真人"}</span>
       </span>
     `)
     .join("");
@@ -801,10 +878,10 @@ function renderPlayers() {
         <div class="player-head">
           <span class="token ${player.type === "ai" ? "token-ai" : "token-human"} panel-token" style="--token-color:${player.color}">
             <span class="token-icon">${player.icon}</span>
-            <span class="token-type">${player.type === "ai" ? "AI" : "人"}</span>
+            <span class="token-type">${player.type === "ai" ? "电脑" : "真人"}</span>
           </span>
           <strong>${player.name}</strong>
-          <span class="badge">${player.type === "human" ? "真人" : "AI"}</span>
+          <span class="badge">${player.type === "human" ? "真人玩家" : "电脑玩家"}</span>
         </div>
         <div class="stats">
           <span><strong>¥${player.cash}</strong>现金</span>
@@ -839,7 +916,7 @@ function renderActions() {
     return;
   }
   if (player.type === "ai") {
-    addButton("AI 自动行动中", null, true, "wide");
+    addButton("电脑玩家自动行动中", null, true, "wide");
     return;
   }
   if (player.jailTurns > 0 && state.phase === "roll") {
@@ -939,6 +1016,7 @@ function showAssetManager() {
 function renderEnd(winner) {
   const ranking = [...state.players].sort((a, b) => netWorth(b) - netWorth(a));
   elements.winnerTitle.textContent = `${winner.icon} ${winner.name} 获胜`;
+  playSound("win");
   elements.finalRanking.innerHTML = ranking.map((player, index) => `
     <article class="player-card ${player.bankrupt ? "bankrupt" : ""}">
       <div class="player-head">
