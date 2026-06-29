@@ -668,7 +668,24 @@ function buildHouse(player, tile) {
 }
 
 function canBuildHouse(player, tile) {
-  return tile.type === "property" && tile.owner === player.id && !tile.mortgaged && tile.houses < MAX_HOUSES && hasMonopoly(player, tile.group) && player.cash >= tile.houseCost;
+  return !buildHouseBlockReason(player, tile);
+}
+
+function buildHouseBlockReason(player, tile) {
+  if (tile.type !== "property") return "只有城市地块可以建房。";
+  if (tile.owner !== player.id) return "只能在自己的城市建房。";
+  if (tile.mortgaged) return "已抵押的城市不能建房。";
+  if (!hasMonopoly(player, tile.group)) return "需要拥有完整同色组，且组内城市都未抵押。";
+  if (tile.houses >= MAX_HOUSES) return "该城市房屋已达上限。";
+  if (!canBuildEvenly(tile)) return "需先在同组房屋较少的城市建房。";
+  if (player.cash < tile.houseCost) return `现金不足，需要 ¥${tile.houseCost}。`;
+  return "";
+}
+
+function canBuildEvenly(tile) {
+  const groupTiles = propertyGroupTiles(tile.group);
+  const fewestHouses = Math.min(...groupTiles.map((groupTile) => groupTile.houses));
+  return tile.houses === fewestHouses;
 }
 
 function mortgageTile(player, tile, silent = false) {
@@ -716,8 +733,11 @@ function aiBuildAndMortgage(player) {
 
 function hasMonopoly(player, group) {
   if (!group) return false;
-  const groupTiles = state.board.filter((tile) => tile.type === "property" && tile.group === group);
-  return groupTiles.every((tile) => tile.owner === player.id && !tile.mortgaged);
+  return propertyGroupTiles(group).every((tile) => tile.owner === player.id && !tile.mortgaged);
+}
+
+function propertyGroupTiles(group) {
+  return state.board.filter((tile) => tile.type === "property" && tile.group === group);
 }
 
 function shouldAiBuy(player, tile) {
@@ -987,6 +1007,7 @@ function showAssetManager() {
   const rows = player.properties.map((index) => {
     const tile = state.board[index];
     const buildDisabled = !canBuildHouse(player, tile);
+    const buildReason = buildDisabled ? buildHouseBlockReason(player, tile) : "建造 1 栋房屋";
     const mortgageDisabled = !canMortgage(player, tile);
     const redeemDisabled = !canRedeem(player, tile);
     return `
@@ -995,7 +1016,7 @@ function showAssetManager() {
           <strong>${tile.name}</strong><br />
           <span>${tile.mortgaged ? "已抵押" : `${tile.houses || 0} 栋房屋`}</span>
         </div>
-        ${tile.type === "property" ? `<button class="small-btn" data-action="build" data-index="${index}" ${buildDisabled ? "disabled" : ""}>建房</button>` : "<span></span>"}
+        ${tile.type === "property" ? `<button class="small-btn" data-action="build" data-index="${index}" title="${buildReason}" ${buildDisabled ? "disabled" : ""}>建房</button>` : "<span></span>"}
         <button class="small-btn" data-action="${tile.mortgaged ? "redeem" : "mortgage"}" data-index="${index}" ${(tile.mortgaged ? redeemDisabled : mortgageDisabled) ? "disabled" : ""}>${tile.mortgaged ? "赎回" : "抵押"}</button>
       </div>
     `;
