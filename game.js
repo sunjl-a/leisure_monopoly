@@ -675,9 +675,7 @@ function buildHouseBlockReason(player, tile) {
   if (tile.type !== "property") return "只有城市地块可以建房。";
   if (tile.owner !== player.id) return "只能在自己的城市建房。";
   if (tile.mortgaged) return "已抵押的城市不能建房。";
-  if (!hasMonopoly(player, tile.group)) return "需要拥有完整同色组，且组内城市都未抵押。";
   if (tile.houses >= MAX_HOUSES) return "该城市房屋已达上限。";
-  if (!canBuildEvenly(tile)) return "需先在同组房屋较少的城市建房。";
   if (player.cash < tile.houseCost) return `现金不足，需要 ¥${tile.houseCost}。`;
   return "";
 }
