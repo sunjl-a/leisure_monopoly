@@ -236,6 +236,7 @@ function startGame() {
       getOutCards: 0,
       bankrupt: false,
       lastRoll: 0,
+      builtHouseThisTurn: false,
     });
   }
   if (!players.some((player) => player.type === "human")) {
@@ -281,6 +282,7 @@ function beginTurn() {
   }
   state.phase = "roll";
   state.pendingDebt = null;
+  player.builtHouseThisTurn = false;
   addLog(`轮到 ${player.name}。`);
   render();
   if (player.type === "ai") {
@@ -663,6 +665,7 @@ function buildHouse(player, tile) {
   if (!canBuildHouse(player, tile)) return;
   player.cash -= tile.houseCost;
   tile.houses += 1;
+  player.builtHouseThisTurn = true;
   addLog(`${player.name} 在 ${tile.name} 建造房屋，支付 ¥${tile.houseCost}。`);
   render();
 }
@@ -676,6 +679,7 @@ function buildHouseBlockReason(player, tile) {
   if (tile.owner !== player.id) return "只能在自己的城市建房。";
   if (tile.mortgaged) return "已抵押的城市不能建房。";
   if (tile.houses >= MAX_HOUSES) return "该城市房屋已达上限。";
+  if (player.builtHouseThisTurn) return "本回合已经建过房屋。";
   if (player.cash < tile.houseCost) return `现金不足，需要 ¥${tile.houseCost}。`;
   return "";
 }

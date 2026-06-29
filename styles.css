@@ -303,7 +303,7 @@ input {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-rows: 9px minmax(0, 1fr) 30px;
+  grid-template-rows: 7px minmax(0, 1fr) 21px;
   overflow: hidden;
   border: 2px solid rgba(91, 63, 43, 0.65);
   border-radius: 6px;
@@ -349,15 +349,19 @@ input {
 
 .tile-body {
   min-width: 0;
-  padding: 5px;
+  min-height: 0;
+  padding: 2px 3px;
   display: grid;
-  place-items: center;
+  grid-template-rows: minmax(14px, auto) minmax(11px, auto);
+  align-content: center;
+  justify-items: center;
+  gap: 1px;
   text-align: center;
 }
 
 .tile-icon {
   display: block;
-  font-size: clamp(16px, 1.8vw, 24px);
+  font-size: clamp(14px, 1.45vw, 19px);
   line-height: 1;
 }
 
@@ -366,7 +370,7 @@ input {
   max-width: 100%;
   overflow: hidden;
   color: var(--ink);
-  font-size: clamp(10px, 1vw, 13px);
+  font-size: clamp(9px, 0.86vw, 12px);
   font-weight: 900;
   line-height: 1.1;
   text-overflow: ellipsis;
@@ -381,10 +385,10 @@ input {
   justify-content: center;
   flex-wrap: wrap;
   gap: 2px;
-  padding: 1px 3px 2px;
-  font-size: 11px;
+  padding: 0 3px 2px;
+  font-size: 9px;
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1;
 }
 
 .start-label,
@@ -409,7 +413,7 @@ input {
 
 .sale-label {
   min-width: 0;
-  width: 100%;
+  width: min(100%, 50px);
   border: 1px solid rgba(91, 63, 43, 0.32);
   background: #fff4d8;
   color: #6c4a22;
@@ -419,10 +423,15 @@ input {
   white-space: nowrap;
 }
 
+.sale-label span {
+  font-size: 7px;
+  line-height: 1;
+}
+
 .sale-label strong {
   display: block;
   color: #7d551f;
-  font-size: 10px;
+  font-size: 9px;
   line-height: 1;
 }
 
@@ -764,7 +773,7 @@ input {
   }
 
   .tile {
-    grid-template-rows: 5px minmax(0, 1fr) 24px;
+    grid-template-rows: 5px minmax(0, 1fr) 18px;
     border-width: 1px;
     border-radius: 4px;
   }
@@ -779,7 +788,7 @@ input {
 
   .tile-meta {
     padding: 0 2px 1px;
-    font-size: 8px;
+    font-size: 7px;
   }
 
   .house {
@@ -815,7 +824,7 @@ input {
   }
 
   .sale-label strong {
-    font-size: 8px;
+    font-size: 7px;
   }
 
   .center-content strong {
