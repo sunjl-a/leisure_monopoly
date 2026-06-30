@@ -282,13 +282,16 @@ input {
 }
 
 .center-content {
-  max-width: 420px;
+  width: min(520px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 520px;
   text-align: center;
 }
 
 .center-content strong {
   display: block;
-  margin-bottom: 8px;
   font-size: 30px;
 }
 
@@ -296,6 +299,18 @@ input {
   color: #42605a;
   font-size: 14px;
   line-height: 1.6;
+}
+
+.center-log {
+  width: min(460px, 100%);
+  padding: 12px;
+  text-align: left;
+  box-shadow: 0 10px 24px rgba(47, 36, 20, 0.12);
+}
+
+.center-log h3 {
+  margin-bottom: 8px;
+  font-size: 15px;
 }
 
 .tile {
@@ -656,7 +671,7 @@ input {
 }
 
 .game-log {
-  max-height: 260px;
+  max-height: clamp(90px, 18vw, 190px);
   margin: 0;
   padding-left: 22px;
   overflow: auto;

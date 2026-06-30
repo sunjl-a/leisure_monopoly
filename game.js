@@ -815,6 +815,10 @@ function renderBoard() {
       <div class="center-content">
         <strong>🏙️ 城市大富翁</strong>
         <span>买下城市、建设街区、收取租金。抵押可以救急，但会暂停收租。</span>
+        <section class="log-panel center-log">
+          <h3>游戏日志</h3>
+          <ol id="game-log" class="game-log"></ol>
+        </section>
       </div>
     </div>
   `;
@@ -985,6 +989,8 @@ function addButton(label, handler, disabled = false, className = "") {
 }
 
 function renderLog() {
+  elements.gameLog = document.querySelector("#game-log");
+  if (!elements.gameLog) return;
   elements.gameLog.innerHTML = state.logs.slice(0, 80).map((entry) => `<li>${entry}</li>`).join("");
 }
 
