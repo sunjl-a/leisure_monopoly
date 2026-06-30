@@ -9,7 +9,7 @@ const PLAYER_ICONS = ["🐼", "🦊", "🐯", "🐵"];
 const GROUP_COLORS = {
   brown: "#8b5a2b",
   cyan: "#56ccf2",
-  pink: "#eb5757",
+  pink: "#c044d8",
   orange: "#f2994a",
   red: "#d7263d",
   yellow: "#f2c94c",
