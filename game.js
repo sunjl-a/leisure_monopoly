@@ -8,11 +8,11 @@ const PLAYER_COLORS = ["#e74c3c", "#2f80ed", "#27ae60", "#9b51e0"];
 const PLAYER_ICONS = ["🐼", "🦊", "🐯", "🐵"];
 const GROUP_COLORS = {
   brown: "#8b5a2b",
-  cyan: "#56ccf2",
+  cyan: "#2dd4bf",
   pink: "#c044d8",
   orange: "#f2994a",
   red: "#d7263d",
-  yellow: "#f2c94c",
+  yellow: "#e8d900",
   green: "#219653",
   blue: "#2f80ed",
   transit: "#64748b",
@@ -46,6 +46,10 @@ const elements = {
 
 let state = null;
 let audioContext = null;
+
+function formatMoney(amount) {
+  return `${amount} 万元`;
+}
 
 const SOUND_PATTERNS = {
   start: [
@@ -167,24 +171,24 @@ function transit(name) {
 function createCards() {
   return {
     chance: shuffle([
-      { text: "夜市生意火爆，获得 ¥150。", effect: (p) => changeCash(p, 150) },
+      { text: `夜市生意火爆，获得 ${formatMoney(150)}。`, effect: (p) => changeCash(p, 150) },
       { text: "参加城市路演，前进到上海。", effect: (p) => moveTo(p, 37) },
-      { text: "暴雨延误，支付维修费 ¥80。", effect: (p) => chargePlayer(p, 80, null, "维修费") },
+      { text: `暴雨延误，支付维修费 ${formatMoney(80)}。`, effect: (p) => chargePlayer(p, 80, null, "维修费") },
       { text: "直达起点，领取奖金。", effect: (p) => moveTo(p, 0, true) },
-      { text: "收到文旅补贴 ¥100。", effect: (p) => changeCash(p, 100) },
+      { text: `收到文旅补贴 ${formatMoney(100)}。`, effect: (p) => changeCash(p, 100) },
       { text: "交通违章，进入监狱。", effect: (p) => sendToJail(p) },
-      { text: "城市更新基金，每栋房屋支付 ¥25。", effect: (p) => chargePlayer(p, countHouses(p) * 25, null, "城市更新基金") },
+      { text: `城市更新基金，每栋房屋支付 ${formatMoney(25)}。`, effect: (p) => chargePlayer(p, countHouses(p) * 25, null, "城市更新基金") },
       { text: "机场快线优惠，前进 3 格。", effect: (p) => moveSteps(p, 3) },
     ]),
     fate: shuffle([
-      { text: "银行分红，获得 ¥200。", effect: (p) => changeCash(p, 200) },
-      { text: "医疗支出，支付 ¥100。", effect: (p) => chargePlayer(p, 100, null, "医疗支出") },
+      { text: `银行分红，获得 ${formatMoney(200)}。`, effect: (p) => changeCash(p, 200) },
+      { text: `医疗支出，支付 ${formatMoney(100)}。`, effect: (p) => chargePlayer(p, 100, null, "医疗支出") },
       { text: "前进到最近交通枢纽。", effect: (p) => moveToNearest(p, ["transit"]) },
-      { text: "社区活动获奖，获得 ¥50。", effect: (p) => changeCash(p, 50) },
+      { text: `社区活动获奖，获得 ${formatMoney(50)}。`, effect: (p) => changeCash(p, 50) },
       { text: "回到南京。", effect: (p) => moveTo(p, 1) },
       { text: "获得保释卡。", effect: (p) => { p.getOutCards += 1; addLog(`${p.name} 获得一张保释卡。`); } },
-      { text: "给每位未破产玩家发红包 ¥30。", effect: (p) => payEveryPlayer(p, 30) },
-      { text: "公共服务奖励，从每位未破产玩家收取 ¥25。", effect: (p) => collectFromEveryPlayer(p, 25) },
+      { text: `给每位未破产玩家发红包 ${formatMoney(30)}。`, effect: (p) => payEveryPlayer(p, 30) },
+      { text: `公共服务奖励，从每位未破产玩家收取 ${formatMoney(25)}。`, effect: (p) => collectFromEveryPlayer(p, 25) },
     ]),
   };
 }
@@ -257,7 +261,7 @@ function startGame() {
     auction: null,
   };
   showScreen("game");
-  addLog("游戏开始。每位玩家获得 ¥1500。");
+  addLog(`游戏开始。每位玩家获得 ${formatMoney(START_CASH)}。`);
   playSound("start");
   render();
   beginTurn();
@@ -342,7 +346,7 @@ function moveSteps(player, steps) {
   const newPosition = (oldPosition + steps) % state.board.length;
   if (oldPosition + steps >= state.board.length) {
     changeCash(player, PASS_GO_CASH, false);
-    addLog(`${player.name} 经过起点，获得 ¥${PASS_GO_CASH}。`);
+    addLog(`${player.name} 经过起点，获得 ${formatMoney(PASS_GO_CASH)}。`);
     playSound("money");
   }
   player.position = newPosition;
@@ -352,7 +356,7 @@ function moveSteps(player, steps) {
 function moveTo(player, index, alwaysPayGo = false) {
   if (alwaysPayGo || index < player.position) {
     changeCash(player, PASS_GO_CASH, false);
-    addLog(`${player.name} 经过起点，获得 ¥${PASS_GO_CASH}。`);
+    addLog(`${player.name} 经过起点，获得 ${formatMoney(PASS_GO_CASH)}。`);
     playSound("money");
   }
   player.position = index;
@@ -419,7 +423,7 @@ function buyTile(player, tile) {
   player.cash -= tile.price;
   tile.owner = player.id;
   player.properties.push(state.board.indexOf(tile));
-  addLog(`${player.name} 购买 ${tile.name}，支付 ¥${tile.price}。`);
+  addLog(`${player.name} 购买 ${tile.name}，支付 ${formatMoney(tile.price)}。`);
   playSound("money");
   render();
 }
@@ -499,7 +503,7 @@ function placeBid(player, amount) {
   if (!auction || amount <= auction.highestBid || amount > player.cash) return;
   auction.highestBid = amount;
   auction.winner = player.id;
-  addLog(`${player.name} 出价 ¥${amount}。`);
+  addLog(`${player.name} 出价 ${formatMoney(amount)}。`);
   auction.cursor = (auction.cursor + 1) % auction.bidders.length;
   render();
   continueAuction();
@@ -516,7 +520,7 @@ function finishAuction() {
     winner.cash -= auction.highestBid;
     tile.owner = winner.id;
     winner.properties.push(auction.tileIndex);
-    addLog(`${winner.name} 以 ¥${auction.highestBid} 拍得 ${tile.name}。`);
+    addLog(`${winner.name} 以 ${formatMoney(auction.highestBid)} 拍得 ${tile.name}。`);
     playSound("money");
   } else {
     addLog(`${tile.name} 流拍。`);
@@ -561,7 +565,7 @@ function drawCard(player, deckName) {
 function chargePlayer(player, amount, receiver = null, reason = "费用") {
   if (amount <= 0) return;
   player.cash -= amount;
-  addLog(`${player.name} 支付 ${reason} ¥${amount}${receiver ? ` 给 ${receiver.name}` : ""}。`);
+  addLog(`${player.name} 支付 ${reason} ${formatMoney(amount)}${receiver ? ` 给 ${receiver.name}` : ""}。`);
   playSound("money");
   if (player.cash < 0) {
     state.pendingDebt = { playerId: player.id, receiverId: receiver ? receiver.id : null, amount: Math.abs(player.cash), reason };
@@ -573,7 +577,7 @@ function chargePlayer(player, amount, receiver = null, reason = "费用") {
 
 function changeCash(player, amount, log = true) {
   player.cash += amount;
-  if (log) addLog(`${player.name} ${amount >= 0 ? "获得" : "支付"} ¥${Math.abs(amount)}。`);
+  if (log) addLog(`${player.name} ${amount >= 0 ? "获得" : "支付"} ${formatMoney(Math.abs(amount))}。`);
   if (log) playSound("money");
 }
 
@@ -643,7 +647,7 @@ function leaveJail(player) {
   if (player.cash >= BAIL_COST) {
     player.cash -= BAIL_COST;
     player.jailTurns = 0;
-    addLog(`${player.name} 支付 ¥${BAIL_COST} 保释离开监狱。`);
+    addLog(`${player.name} 支付 ${formatMoney(BAIL_COST)} 保释离开监狱。`);
     playSound("money");
     render();
     return true;
@@ -666,7 +670,7 @@ function buildHouse(player, tile) {
   player.cash -= tile.houseCost;
   tile.houses += 1;
   player.builtHouseThisTurn = true;
-  addLog(`${player.name} 在 ${tile.name} 建造房屋，支付 ¥${tile.houseCost}。`);
+  addLog(`${player.name} 在 ${tile.name} 建造房屋，支付 ${formatMoney(tile.houseCost)}。`);
   render();
 }
 
@@ -681,7 +685,7 @@ function buildHouseBlockReason(player, tile) {
   if (tile.houses >= MAX_HOUSES) return "该城市房屋已达上限。";
   if (player.builtHouseThisTurn) return "本回合已经建过房屋。";
   if (!canBuildEvenly(player, tile)) return "需先给同组房屋更少的城市建房。";
-  if (player.cash < tile.houseCost) return `现金不足，需要 ¥${tile.houseCost}。`;
+  if (player.cash < tile.houseCost) return `现金不足，需要 ${formatMoney(tile.houseCost)}。`;
   return "";
 }
 
@@ -698,7 +702,7 @@ function mortgageTile(player, tile, silent = false) {
   tile.mortgaged = true;
   const value = Math.floor(tile.price / 2);
   player.cash += value;
-  addLog(`${player.name} 抵押 ${tile.name}，获得 ¥${value}。`);
+  addLog(`${player.name} 抵押 ${tile.name}，获得 ${formatMoney(value)}。`);
   if (!silent) render();
   return true;
 }
@@ -708,7 +712,7 @@ function redeemTile(player, tile) {
   const cost = Math.ceil(tile.price * 0.55);
   player.cash -= cost;
   tile.mortgaged = false;
-  addLog(`${player.name} 赎回 ${tile.name}，支付 ¥${cost}。`);
+  addLog(`${player.name} 赎回 ${tile.name}，支付 ${formatMoney(cost)}。`);
   render();
 }
 
@@ -862,14 +866,14 @@ function boardPosition(index) {
 }
 
 function renderTileMeta(tile) {
-  if (tile.type === "start") return `<span class="start-label">起点 +¥${PASS_GO_CASH}</span>`;
+  if (tile.type === "start") return `<span class="start-label">起点 +${formatMoney(PASS_GO_CASH)}</span>`;
   if (tile.owner != null) {
     const owner = state.players[tile.owner];
     const houses = tile.houses ? `<span class="house-row">${Array.from({ length: tile.houses }, () => `<span class="house"></span>`).join("")}</span>` : "";
     const status = tile.mortgaged ? `<span class="status-label">抵押</span>` : houses;
     return `<span class="owner-label" style="--owner-color:${owner.color}">${owner.name}</span>${status}`;
   }
-  if (tile.price) return `<span class="sale-label"><span>待售</span><strong>¥${tile.price}</strong></span>`;
+  if (tile.price) return `<span class="sale-label"><span>待售</span><strong>${formatMoney(tile.price)}</strong></span>`;
   return "";
 }
 
@@ -913,7 +917,7 @@ function renderPlayers() {
           <span class="badge">${player.type === "human" ? "真人玩家" : "电脑玩家"}</span>
         </div>
         <div class="stats">
-          <span><strong>¥${player.cash}</strong>现金</span>
+          <span><strong>${formatMoney(player.cash)}</strong>现金</span>
           <span><strong>${player.properties.length}</strong>资产</span>
           <span><strong>${player.jailTurns > 0 ? player.jailTurns : "-"}</strong>监狱</span>
         </div>
@@ -937,7 +941,7 @@ function renderActions() {
     }
     if (bidder && bidder.type === "human") {
       const bid = Math.min(bidder.cash, auction.highestBid + 20);
-      addButton(`出价 ¥${bid}`, () => humanAuctionBid(bid), bid > bidder.cash);
+      addButton(`出价 ${formatMoney(bid)}`, () => humanAuctionBid(bid), bid > bidder.cash);
       addButton("退出拍卖", humanAuctionPass);
     } else {
       addButton("等待拍卖", null, true, "wide");
@@ -949,7 +953,7 @@ function renderActions() {
     return;
   }
   if (player.jailTurns > 0 && state.phase === "roll") {
-    addButton(player.getOutCards > 0 ? "使用保释卡" : `支付保释 ¥${BAIL_COST}`, () => { leaveJail(player); render(); }, !player.getOutCards && player.cash < BAIL_COST);
+    addButton(player.getOutCards > 0 ? "使用保释卡" : `支付保释 ${formatMoney(BAIL_COST)}`, () => { leaveJail(player); render(); }, !player.getOutCards && player.cash < BAIL_COST);
     addButton("停留一回合", skipJailTurn);
     return;
   }
@@ -959,7 +963,7 @@ function renderActions() {
   }
   const tile = state.board[player.position];
   if (isPurchasable(tile)) {
-    addButton(`购买 ¥${tile.price}`, () => buyTile(player, tile), !canBuy(player, tile));
+    addButton(`购买 ${formatMoney(tile.price)}`, () => buyTile(player, tile), !canBuy(player, tile));
     addButton("发起拍卖", () => startAuction(tile));
   }
   addButton("资产管理", showAssetManager);
@@ -970,7 +974,7 @@ function turnMessage(player) {
   if (state.phase === "auction" && state.auction) {
     const tile = state.board[state.auction.tileIndex];
     const bidder = currentAuctionPlayer();
-    return `${tile.name} 正在拍卖，当前最高价 ¥${state.auction.highestBid || 0}${bidder ? `，等待 ${bidder.name}` : ""}。`;
+    return `${tile.name} 正在拍卖，当前最高价 ${formatMoney(state.auction.highestBid || 0)}${bidder ? `，等待 ${bidder.name}` : ""}。`;
   }
   if (player.jailTurns > 0 && state.phase === "roll") return `你在监狱中，还需等待 ${player.jailTurns} 回合，也可以保释离开。`;
   const tile = state.board[player.position];
@@ -998,13 +1002,13 @@ function showTileDialog(index) {
   const tile = state.board[index];
   elements.dialogTitle.textContent = tile.name;
   const owner = tile.owner != null ? state.players[tile.owner].name : "无";
-  const rent = tile.type === "property" ? tile.rent.map((value, i) => `${i} 房：¥${value}`).join(" / ") : "";
+  const rent = tile.type === "property" ? tile.rent.map((value, i) => `${i} 房：${formatMoney(value)}`).join(" / ") : "";
   elements.dialogBody.innerHTML = `
     <p><strong>类型：</strong>${tileTypeName(tile.type)}</p>
-    ${tile.price ? `<p><strong>价格：</strong>¥${tile.price}</p>` : ""}
+    ${tile.price ? `<p><strong>价格：</strong>${formatMoney(tile.price)}</p>` : ""}
     ${tile.group ? `<p><strong>城市组：</strong><span style="color:${GROUP_COLORS[tile.group]};font-weight:900"> ${tile.group}</span></p>` : ""}
     <p><strong>拥有者：</strong>${owner}</p>
-    ${tile.houseCost ? `<p><strong>建房成本：</strong>¥${tile.houseCost}</p>` : ""}
+    ${tile.houseCost ? `<p><strong>建房成本：</strong>${formatMoney(tile.houseCost)}</p>` : ""}
     ${rent ? `<p><strong>租金：</strong>${rent}</p>` : ""}
     ${tile.mortgaged ? "<p><strong>状态：</strong>已抵押，不收租。</p>" : ""}
   `;
@@ -1055,7 +1059,7 @@ function renderEnd(winner) {
       <div class="player-head">
         <span class="token" style="background:${player.color}">${player.icon}</span>
         <strong>第 ${index + 1} 名：${player.name}</strong>
-        <span class="badge">总资产 ¥${netWorth(player)}</span>
+        <span class="badge">总资产 ${formatMoney(netWorth(player))}</span>
       </div>
     </article>
   `).join("");
