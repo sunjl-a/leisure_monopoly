@@ -680,12 +680,15 @@ function buildHouseBlockReason(player, tile) {
   if (tile.mortgaged) return "已抵押的城市不能建房。";
   if (tile.houses >= MAX_HOUSES) return "该城市房屋已达上限。";
   if (player.builtHouseThisTurn) return "本回合已经建过房屋。";
+  if (!canBuildEvenly(player, tile)) return "需先给同组房屋更少的城市建房。";
   if (player.cash < tile.houseCost) return `现金不足，需要 ¥${tile.houseCost}。`;
   return "";
 }
 
-function canBuildEvenly(tile) {
-  const groupTiles = propertyGroupTiles(tile.group);
+function canBuildEvenly(player, tile) {
+  const groupTiles = player.properties
+    .map((index) => state.board[index])
+    .filter((groupTile) => groupTile.type === "property" && groupTile.group === tile.group && !groupTile.mortgaged);
   const fewestHouses = Math.min(...groupTiles.map((groupTile) => groupTile.houses));
   return tile.houses === fewestHouses;
 }
@@ -1017,6 +1020,7 @@ function showAssetManager() {
         <div>
           <strong>${tile.name}</strong><br />
           <span>${tile.mortgaged ? "已抵押" : `${tile.houses || 0} 栋房屋`}</span>
+          ${buildDisabled && tile.type === "property" ? `<span class="asset-reason">${buildReason}</span>` : ""}
         </div>
         ${tile.type === "property" ? `<button class="small-btn" data-action="build" data-index="${index}" title="${buildReason}" ${buildDisabled ? "disabled" : ""}>建房</button>` : "<span></span>"}
         <button class="small-btn" data-action="${tile.mortgaged ? "redeem" : "mortgage"}" data-index="${index}" ${(tile.mortgaged ? redeemDisabled : mortgageDisabled) ? "disabled" : ""}>${tile.mortgaged ? "赎回" : "抵押"}</button>

@@ -712,6 +712,14 @@ input {
   border-bottom: 1px solid #ecdcbf;
 }
 
+.asset-reason {
+  display: block;
+  margin-top: 2px;
+  color: #a15f33;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
 .small-btn {
   min-height: 32px;
   padding: 6px 9px;
