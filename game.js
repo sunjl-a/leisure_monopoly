@@ -625,7 +625,9 @@ function declareBankruptcy(player, receiverId = null) {
   player.cash = 0;
   state.pendingDebt = null;
   render();
-  checkWinner();
+  if (!checkWinner() && currentPlayer().id === player.id) {
+    setTimeout(nextTurn, AI_DELAY);
+  }
 }
 
 function sendToJail(player) {
@@ -796,9 +798,11 @@ function nextActiveIndex(index) {
 
 function checkWinner() {
   const active = state.players.filter((player) => !player.bankrupt);
-  if (active.length === 1) {
+  const activeHumans = active.filter((player) => player.type === "human");
+  if (active.length === 1 || activeHumans.length === 0) {
+    const winner = [...active].sort((a, b) => netWorth(b) - netWorth(a))[0];
     state.phase = "ended";
-    renderEnd(active[0]);
+    renderEnd(winner);
     return true;
   }
   return false;
@@ -940,7 +944,7 @@ function renderActions() {
       elements.turnTitle.textContent = `${bidder.icon} ${bidder.name}`;
     }
     if (bidder && bidder.type === "human") {
-      const bid = Math.min(bidder.cash, auction.highestBid + 20);
+      const bid = Math.max(10, auction.highestBid + 20);
       addButton(`出价 ${formatMoney(bid)}`, () => humanAuctionBid(bid), bid > bidder.cash);
       addButton("退出拍卖", humanAuctionPass);
     } else {
